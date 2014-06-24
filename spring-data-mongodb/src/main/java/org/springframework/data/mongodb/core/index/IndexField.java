@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,27 @@ import org.springframework.util.ObjectUtils;
  * Value object for an index field.
  * 
  * @author Oliver Gierke
+ * @author Christoph Strobl
  */
 @SuppressWarnings("deprecation")
 public final class IndexField {
 
+	enum Type {
+		GEO, TEXT, DEFAULT;
+	}
+
 	private final String key;
 	private final Direction direction;
-	private final boolean isGeo;
+	private final Type type;
 
-	private IndexField(String key, Direction direction, boolean isGeo) {
+	private IndexField(String key, Direction direction, Type type) {
 
 		Assert.hasText(key);
-		Assert.isTrue(direction != null ^ isGeo);
+		Assert.isTrue(direction != null ^ (Type.GEO.equals(type) || Type.TEXT.equals(type)));
 
 		this.key = key;
 		this.direction = direction;
-		this.isGeo = isGeo;
+		this.type = type == null ? Type.DEFAULT : type;
 	}
 
 	/**
@@ -53,12 +58,12 @@ public final class IndexField {
 	@Deprecated
 	public static IndexField create(String key, Order order) {
 		Assert.notNull(order);
-		return new IndexField(key, order.toDirection(), false);
+		return new IndexField(key, order.toDirection(), Type.DEFAULT);
 	}
 
 	public static IndexField create(String key, Direction order) {
 		Assert.notNull(order);
-		return new IndexField(key, order, false);
+		return new IndexField(key, order, Type.DEFAULT);
 	}
 
 	/**
@@ -68,7 +73,16 @@ public final class IndexField {
 	 * @return
 	 */
 	public static IndexField geo(String key) {
-		return new IndexField(key, null, true);
+		return new IndexField(key, null, Type.GEO);
+	}
+
+	/**
+	 * Creates a text {@link IndexField} for the given key.
+	 * 
+	 * @since 1.6
+	 */
+	public static IndexField text(String key) {
+		return new IndexField(key, null, Type.TEXT);
 	}
 
 	/**
@@ -101,10 +115,20 @@ public final class IndexField {
 	/**
 	 * Returns whether the {@link IndexField} is a geo index field.
 	 * 
-	 * @return the isGeo
+	 * @return true if type is {@link Type#GEO}.
 	 */
 	public boolean isGeo() {
-		return isGeo;
+		return Type.GEO.equals(type);
+	}
+
+	/**
+	 * Returns wheter the {@link IndexField} is a text index field.
+	 * 
+	 * @return true if type is {@link Type#TEXT}
+	 * @since 1.6
+	 */
+	public boolean isText() {
+		return Type.TEXT.equals(type);
 	}
 
 	/*
@@ -125,7 +149,7 @@ public final class IndexField {
 		IndexField that = (IndexField) obj;
 
 		return this.key.equals(that.key) && ObjectUtils.nullSafeEquals(this.direction, that.direction)
-				&& this.isGeo == that.isGeo;
+				&& this.type == that.type;
 	}
 
 	/* 
@@ -138,7 +162,7 @@ public final class IndexField {
 		int result = 17;
 		result += 31 * ObjectUtils.nullSafeHashCode(key);
 		result += 31 * ObjectUtils.nullSafeHashCode(direction);
-		result += 31 * ObjectUtils.nullSafeHashCode(isGeo);
+		result += 31 * ObjectUtils.nullSafeHashCode(type);
 		return result;
 	}
 
@@ -148,6 +172,7 @@ public final class IndexField {
 	 */
 	@Override
 	public String toString() {
-		return String.format("IndexField [ key: %s, direction: %s, isGeo: %s]", key, direction, isGeo);
+		return String.format("IndexField [ key: %s, direction: %s, type: %s]", key, direction, type);
 	}
+
 }

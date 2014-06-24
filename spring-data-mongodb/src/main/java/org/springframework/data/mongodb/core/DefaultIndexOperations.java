@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2013 the original author or authors.
+ * Copyright 2011-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import com.mongodb.MongoException;
  * @author Mark Pollack
  * @author Oliver Gierke
  * @author Komi Innocent
+ * @author Christoph Strobl
  */
 public class DefaultIndexOperations implements IndexOperations {
 
@@ -142,6 +143,8 @@ public class DefaultIndexOperations implements IndexOperations {
 
 						if ("2d".equals(value)) {
 							indexFields.add(IndexField.geo(key));
+						} else if ("text".equals(value)) {
+							indexFields.add(IndexField.text(key));
 						} else {
 
 							Double keyValue = new Double(value.toString());
