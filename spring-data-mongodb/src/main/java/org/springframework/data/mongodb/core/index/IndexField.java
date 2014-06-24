@@ -36,8 +36,13 @@ public final class IndexField {
 	private final String key;
 	private final Direction direction;
 	private final Type type;
+	private final Float weight;
 
 	private IndexField(String key, Direction direction, Type type) {
+		this(key, direction, type, Float.NaN);
+	}
+
+	private IndexField(String key, Direction direction, Type type, Float weight) {
 
 		Assert.hasText(key);
 		Assert.isTrue(direction != null ^ (Type.GEO.equals(type) || Type.TEXT.equals(type)));
@@ -45,6 +50,7 @@ public final class IndexField {
 		this.key = key;
 		this.direction = direction;
 		this.type = type == null ? Type.DEFAULT : type;
+		this.weight = weight == null ? Float.NaN : weight;
 	}
 
 	/**
@@ -81,8 +87,8 @@ public final class IndexField {
 	 * 
 	 * @since 1.6
 	 */
-	public static IndexField text(String key) {
-		return new IndexField(key, null, Type.TEXT);
+	public static IndexField text(String key, Float weight) {
+		return new IndexField(key, null, Type.TEXT, weight);
 	}
 
 	/**
@@ -163,6 +169,7 @@ public final class IndexField {
 		result += 31 * ObjectUtils.nullSafeHashCode(key);
 		result += 31 * ObjectUtils.nullSafeHashCode(direction);
 		result += 31 * ObjectUtils.nullSafeHashCode(type);
+		result += 31 * ObjectUtils.nullSafeHashCode(weight);
 		return result;
 	}
 
@@ -172,7 +179,7 @@ public final class IndexField {
 	 */
 	@Override
 	public String toString() {
-		return String.format("IndexField [ key: %s, direction: %s, type: %s]", key, direction, type);
+		return String.format("IndexField [ key: %s, direction: %s, type: %s, weight: %s]", key, direction, type, weight);
 	}
 
 }

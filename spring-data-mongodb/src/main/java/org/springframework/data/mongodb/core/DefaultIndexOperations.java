@@ -144,7 +144,12 @@ public class DefaultIndexOperations implements IndexOperations {
 						if ("2d".equals(value)) {
 							indexFields.add(IndexField.geo(key));
 						} else if ("text".equals(value)) {
-							indexFields.add(IndexField.text(key));
+
+							DBObject weights = (DBObject) ix.get("weights");
+							for (String fieldName : weights.keySet()) {
+								indexFields.add(IndexField.text(fieldName, Float.valueOf(weights.get(fieldName).toString())));
+							}
+
 						} else {
 
 							Double keyValue = new Double(value.toString());
@@ -162,8 +167,8 @@ public class DefaultIndexOperations implements IndexOperations {
 					boolean unique = ix.containsField("unique") ? (Boolean) ix.get("unique") : false;
 					boolean dropDuplicates = ix.containsField("dropDups") ? (Boolean) ix.get("dropDups") : false;
 					boolean sparse = ix.containsField("sparse") ? (Boolean) ix.get("sparse") : false;
-
-					indexInfoList.add(new IndexInfo(indexFields, name, unique, dropDuplicates, sparse));
+					String language = ix.containsField("default_language") ? (String) ix.get("default_language") : "";
+					indexInfoList.add(new IndexInfo(indexFields, name, unique, dropDuplicates, sparse, language));
 				}
 
 				return indexInfoList;
