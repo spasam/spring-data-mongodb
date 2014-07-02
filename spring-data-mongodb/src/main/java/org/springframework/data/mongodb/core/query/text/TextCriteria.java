@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.CriteriaDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -34,7 +35,7 @@ import com.mongodb.DBObject;
  * @author Christoph Strobl
  * @since 1.6
  */
-public class TextCriteria implements CriteriaDefinition {
+public class TextCriteria extends Criteria {
 
 	private String language;
 	private List<Term> terms;
@@ -212,6 +213,11 @@ public class TextCriteria implements CriteriaDefinition {
 			return this.instance;
 		}
 
+	}
+
+	@Override
+	public String getKey() {
+		return "$text";
 	}
 
 }

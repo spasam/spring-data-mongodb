@@ -19,9 +19,9 @@ import static org.junit.Assert.*;
 import static org.springframework.data.mongodb.core.query.text.IsTextQuery.*;
 
 import org.junit.Test;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import com.mongodb.BasicDBObject;
+import org.springframework.data.mongodb.core.query.Query;
 
 /**
  * @author Christoph Strobl
@@ -61,8 +61,8 @@ public class TextQueryUnitTests {
 	@Test
 	public void shouldNotOverrideExistingProjections() {
 
-		TextQuery query = new TextQuery(TextCriteria.forDefaultLanguage().matching(QUERY).getCriteriaObject(),
-				new BasicDBObject("foo", 1)).includeScore();
+		TextQuery query = new TextQuery(TextCriteria.forDefaultLanguage().matching(QUERY)).includeScore();
+		query.fields().include("foo");
 
 		assertThat(query, isTextQuery().searchingFor(QUERY).returningScore().includingField("foo"));
 	}
@@ -82,7 +82,7 @@ public class TextQueryUnitTests {
 	public void shouldNotOverrideExistingSort() {
 
 		TextQuery query = new TextQuery(QUERY);
-		query.setSortObject(new BasicDBObject("foo", -1));
+		query.with(new Sort(Direction.DESC, "foo"));
 		query.sortByScore();
 
 		assertThat(query,

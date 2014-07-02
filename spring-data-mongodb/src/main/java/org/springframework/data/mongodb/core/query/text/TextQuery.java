@@ -17,7 +17,6 @@ package org.springframework.data.mongodb.core.query.text;
 
 import java.util.Locale;
 
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.mongodb.BasicDBObject;
@@ -29,16 +28,14 @@ import com.mongodb.DBObject;
  * @author Christoph Strobl
  * @since 1.6
  */
-public class TextQuery extends BasicQuery {
+public class TextQuery extends Query {
 
 	private final String DEFAULT_SCORE_FIELD_FIELDNAME = "score";
 	private final DBObject META_TEXT_SCORE = new BasicDBObject("$meta", "textScore");
 
 	private String scoreFieldName = DEFAULT_SCORE_FIELD_FIELDNAME;
-
-	public TextQuery(DBObject queryObject, DBObject fieldsObject) {
-		super(queryObject, fieldsObject);
-	}
+	private boolean includeScore = false;
+	private boolean sortByScore = false;
 
 	/**
 	 * Creates new {@link TextQuery} using the the given {@code wordsAndPhrases} with {@link TextCriteria}
@@ -47,7 +44,7 @@ public class TextQuery extends BasicQuery {
 	 * @see TextCriteria#matching(String)
 	 */
 	public TextQuery(String wordsAndPhrases) {
-		super(TextCriteria.forDefaultLanguage().matching(wordsAndPhrases).getCriteriaObject());
+		super(TextCriteria.forDefaultLanguage().matching(wordsAndPhrases));
 	}
 
 	/**
@@ -61,7 +58,7 @@ public class TextQuery extends BasicQuery {
 	 * @see TextCriteria#matching(String)
 	 */
 	public TextQuery(String wordsAndPhrases, String language) {
-		super(TextCriteria.forLanguage(language).matching(wordsAndPhrases).getCriteriaObject());
+		super(TextCriteria.forLanguage(language).matching(wordsAndPhrases));
 	}
 
 	/**
@@ -82,7 +79,7 @@ public class TextQuery extends BasicQuery {
 	 * @param criteria.
 	 */
 	public TextQuery(TextCriteria criteria) {
-		super(criteria != null ? criteria.getCriteriaObject() : new BasicDBObject());
+		super(criteria);
 	}
 
 	/**
@@ -91,7 +88,7 @@ public class TextQuery extends BasicQuery {
 	 * @param criteria
 	 * @return
 	 */
-	public static TextQuery searching(TextCriteria criteria) {
+	public static TextQuery queryText(TextCriteria criteria) {
 		return new TextQuery(criteria);
 	}
 
@@ -103,8 +100,8 @@ public class TextQuery extends BasicQuery {
 	 */
 	public TextQuery sortByScore() {
 
-		includeScore();
-		appendScoreToSort();
+		this.includeScore();
+		this.sortByScore = true;
 		return this;
 	}
 
@@ -115,7 +112,7 @@ public class TextQuery extends BasicQuery {
 	 */
 	public TextQuery includeScore() {
 
-		appendScoreToFields();
+		this.includeScore = true;
 		return this;
 	}
 
@@ -126,6 +123,7 @@ public class TextQuery extends BasicQuery {
 	 * @return
 	 */
 	public TextQuery includeScore(String fieldname) {
+
 		setScoreFieldName(fieldname);
 		includeScore();
 		return this;
@@ -149,21 +147,32 @@ public class TextQuery extends BasicQuery {
 		return scoreFieldName;
 	}
 
-	private void appendScoreToFields() {
+	@Override
+	public DBObject getFieldsObject() {
+
+		if (!this.includeScore) {
+			return super.getFieldsObject();
+		}
 
 		DBObject fields = super.getFieldsObject();
 		if (fields == null) {
 			fields = new BasicDBObject();
 		}
 		fields.put(getScoreFieldName(), META_TEXT_SCORE);
-		setFieldsObject(fields);
+		return fields;
 	}
 
-	private void appendScoreToSort() {
+	@Override
+	public DBObject getSortObject() {
 
-		DBObject sort = super.getSortObject();
-		sort.put(getScoreFieldName(), META_TEXT_SCORE);
-		setSortObject(sort);
+		DBObject sort = new BasicDBObject();
+		if (this.sortByScore) {
+			sort.put(getScoreFieldName(), META_TEXT_SCORE);
+		}
+		if (super.getSortObject() != null) {
+			sort.putAll(super.getSortObject());
+		}
+		return sort;
 	}
 
 }

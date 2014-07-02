@@ -207,8 +207,8 @@ public class TextQueryTests extends AbstractIntegrationTests {
 
 		initWithDefaultDocuments();
 
-		TextQuery query = TextQuery.searching(TextCriteria.forDefaultLanguage().matchingPhrase("milk and sugar"));
-		List<FullTextDocWithScore> result = template.find(query, FullTextDocWithScore.class);
+		TextQuery query = TextQuery.queryText(TextCriteria.forDefaultLanguage().matchingPhrase("milk and sugar"));
+		List<FullTextDoc> result = template.find(query, FullTextDoc.class);
 
 		assertThat(result, hasSize(1));
 		assertThat(result, contains(MILK_AND_SUGAR));
@@ -222,8 +222,8 @@ public class TextQueryTests extends AbstractIntegrationTests {
 
 		initWithDefaultDocuments();
 
-		TextQuery query = TextQuery.searching(TextCriteria.forDefaultLanguage().matchingPhrase("milk no sugar"));
-		List<FullTextDocWithScore> result = template.find(query, FullTextDocWithScore.class);
+		TextQuery query = TextQuery.queryText(TextCriteria.forDefaultLanguage().matchingPhrase("milk no sugar"));
+		List<FullTextDoc> result = template.find(query, FullTextDoc.class);
 
 		assertThat(result, empty());
 	}

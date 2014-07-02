@@ -28,7 +28,7 @@ import com.mongodb.DBObject;
  * @author Christoph Strobl
  * @param <T>
  */
-public class IsQuery<T extends BasicQuery> extends TypeSafeMatcher<T> {
+public class IsQuery<T extends Query> extends TypeSafeMatcher<T> {
 
 	protected DBObject query;
 	protected DBObject sort;
