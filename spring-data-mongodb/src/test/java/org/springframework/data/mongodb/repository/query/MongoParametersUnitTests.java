@@ -103,11 +103,22 @@ public class MongoParametersUnitTests {
 	 * @see DATAMONGO-973
 	 */
 	@Test
-	public void shouldFindsFullTextParamAnnotationAtItsIndex() throws SecurityException, NoSuchMethodException {
+	public void shouldFindFullTextParamAnnotationAtItsIndex() throws SecurityException, NoSuchMethodException {
 
 		Method method = PersonRepository.class.getMethod("findByNameAndText", String.class, String.class);
 		MongoParameters parameters = new MongoParameters(method, false);
 		assertThat(parameters.getFullTextParameterIndex(), is(1));
+	}
+
+	/**
+	 * @see DATAMONGO-973
+	 */
+	@Test
+	public void shouldTreatFullTextAnnotatedParameterAsSpecialParameter() throws SecurityException, NoSuchMethodException {
+
+		Method method = PersonRepository.class.getMethod("findByNameAndText", String.class, String.class);
+		MongoParameters parameters = new MongoParameters(method, false);
+		assertThat(parameters.getParameter(parameters.getFullTextParameterIndex()).isSpecialParameter(), is(true));
 	}
 
 	interface PersonRepository {
@@ -125,5 +136,6 @@ public class MongoParametersUnitTests {
 		GeoResults<Person> validDoubleArrays(double[] first, @Near double[] second);
 
 		List<Person> findByNameAndText(String name, @FullTextPram String text);
+
 	}
 }
