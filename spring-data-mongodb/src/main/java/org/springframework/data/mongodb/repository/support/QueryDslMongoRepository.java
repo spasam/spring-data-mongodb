@@ -108,10 +108,20 @@ public class QueryDslMongoRepository<T, ID extends Serializable> extends SimpleM
 	 */
 	public Page<T> findAll(Predicate predicate, Pageable pageable) {
 
-		MongodbQuery<T> countQuery = createQueryFor(predicate);
+		//MongodbQuery<T> countQuery = createQueryFor(predicate);
 		MongodbQuery<T> query = createQueryFor(predicate);
+        List<T> list = applyPagination(query, pageable).list();
 
-		return new PageImpl<T>(applyPagination(query, pageable).list(), pageable, countQuery.count());
+        int size = list.size();
+        int pageSize = pageable.getPageSize();
+        int total = (pageable.getPageNumber() * pageSize) + size;
+
+        // If we got what we asked, assume that there is more
+        if (size == pageSize) {
+            total += 1;
+        }
+
+		return new PageImpl<T>(list, pageable, total);
 	}
 
 	/*
