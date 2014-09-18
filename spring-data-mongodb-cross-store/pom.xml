@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.data</groupId>
 		<artifactId>spring-data-mongodb-parent</artifactId>
-		<version>1.5.1.RELEASE-onshape</version>
+		<version>1.5.1.RELEASE-onshape2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
