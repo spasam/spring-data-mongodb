@@ -74,7 +74,7 @@ class SpringDataMongodbSerializer extends MongodbSerializer {
 
 		Path<?> parent = metadata.getParent();
 		MongoPersistentEntity<?> entity = mappingContext.getPersistentEntity(parent.getType());
-		MongoPersistentProperty property = entity.getPersistentProperty(metadata.getName());
+		MongoPersistentProperty property = entity.getPersistentProperty((String) metadata.getElement());
 
 		return property == null ? super.getKeyForPath(expr, metadata) : property.getFieldName();
 	}
@@ -143,6 +143,6 @@ class SpringDataMongodbSerializer extends MongodbSerializer {
 		}
 
 		MongoPersistentEntity<?> entity = mappingContext.getPersistentEntity(parent.getType());
-		return entity != null ? entity.getPersistentProperty(path.getMetadata().getName()) : null;
+		return entity != null ? entity.getPersistentProperty((String) path.getMetadata().getElement()) : null;
 	}
 }
