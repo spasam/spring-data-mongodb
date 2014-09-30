@@ -16,6 +16,8 @@
 package org.springframework.data.mongodb.repository.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -108,10 +110,26 @@ public class QueryDslMongoRepository<T, ID extends Serializable> extends SimpleM
 	 */
 	public Page<T> findAll(Predicate predicate, Pageable pageable) {
 
-		MongodbQuery<T> countQuery = createQueryFor(predicate);
 		MongodbQuery<T> query = createQueryFor(predicate);
+		List<T> list = new ArrayList<T>();
 
-		return new PageImpl<T>(applyPagination(query, pageable).list(), pageable, countQuery.count());
+		// Use iterate() instead of list() method so that DBCursor#size() call is avoided. Otherwise, we pay the penalty
+		// for a count call (additional mongodb query call)
+		Iterator<T> iterator = applyPagination(query, pageable).iterate();
+		while (iterator.hasNext()) {
+			list.add(iterator.next());
+		} 
+
+		int size = list.size();
+		int pageSize = pageable.getPageSize();
+		int total = (pageable.getPageNumber() * pageSize) + size;
+
+		// If we got what we asked, assume that there is more
+		if (size == pageSize) {
+			total += 1;
+		}
+
+		return new PageImpl<T>(list, pageable, total);
 	}
 
 	/*
