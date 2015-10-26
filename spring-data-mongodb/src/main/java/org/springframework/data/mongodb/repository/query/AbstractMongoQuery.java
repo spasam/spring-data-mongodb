@@ -219,16 +219,10 @@ public abstract class AbstractMongoQuery implements RepositoryQuery {
 		Object execute(Query query) {
 
 			MongoEntityMetadata<?> metadata = method.getEntityInformation();
-			int pageSize = pageable.getPageSize();
 
-			// Apply Pageable but tweak limit to peek into next page
-			Query modifiedQuery = query.with(pageable).limit(pageSize + 1);
+			List result = operations.find(query.with(pageable), metadata.getJavaType(), metadata.getCollectionName());
 
-			List result = operations.find(modifiedQuery, metadata.getJavaType(), metadata.getCollectionName());
-
-			boolean hasNext = result.size() > pageSize;
-
-			return new SliceImpl<Object>(hasNext ? result.subList(0, pageSize) : result, pageable, hasNext);
+			return new SliceImpl<Object>(result, pageable, result.size() == pageable.getPageSize());
 		}
 	}
 
